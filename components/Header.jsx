@@ -12,7 +12,7 @@ import { HomeIcon } from "@heroicons/react/24/solid";
 
 function Header() {
   return (
-    <div className="sticky top-0 z-50 border-b shadow-md">
+    <header className="sticky top-0 z-50 bg-white border-b shadow-md">
       {/* Our max-width container wrapper: */}
       <div className="flex items-center justify-between max-w-6xl mx-5 lg:mx-auto">
         {/* Left (Logo) */}
@@ -60,7 +60,7 @@ function Header() {
           />
         </div>
       </div>
-    </div>
+    </header>
   );
 }
 
