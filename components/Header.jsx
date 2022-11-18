@@ -52,7 +52,7 @@ function Header() {
           <HeartIcon className="navBtn" />
           {/* Profile */}
           <Image
-            src="/mario.webp"
+            src="/mario.jpeg"
             alt="profile"
             width={100}
             height={100}

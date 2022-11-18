@@ -1,4 +1,5 @@
 import Stories from "./Stories";
+import Posts from "./Posts";
 // We mobile first approach as a single minmax(0, 1fr) grid at default.
 // In larger viewpoint's are left `section` grid child is to span two cols.
 export default function Feed() {
@@ -7,12 +8,12 @@ export default function Feed() {
       {/* Section (Left)*/}
       <section className="col-span-2">
         <Stories />
-        {/* - Posts */}
+        <Posts />
       </section>
 
       {/* Section (Right) */}
       <section>
-        {/* - Mini-profile */}
+        {/* - MiniProfile */}
         {/* - Suggestions */}
       </section>
     </main>
