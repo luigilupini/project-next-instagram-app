@@ -55,7 +55,7 @@ export default function Post({ id, username, userImg, img, caption }) {
           placeholder="Add a comment here!"
           className="flex-1 mx-2 placeholder-gray-500 border-none rounded outline-none placeholder:text-sm focus:ring-0 bg-gray-50"
         />
-        <button className="font-semibold text-blue-400 hover:text-blue-500">
+        <button className="p-1 text-sm font-semibold text-blue-300 transition-all rounded-md hover:text-blue-500 hover:scale-105">
           Post
         </button>
       </form>
