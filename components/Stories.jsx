@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+
 import { faker } from "@faker-js/faker";
 
-function Story({ name, avatar }) {
+function Story({ username, avatar }) {
   return (
     <div className="">
       <Image
@@ -12,13 +14,16 @@ function Story({ name, avatar }) {
         height={100}
         className="object-contain rounded-full w-14 h-14 p-[1.5px] border-red-400 border-2 hover:scale-110 transition transform duration-200 ease-out"
       />
-      <p className="text-[11px] text-center truncate w-14">{name}</p>
+      <p className="text-[11px] text-center truncate w-14">
+        {username.toLowerCase()}
+      </p>
     </div>
   );
 }
 
 export default function Stories() {
   const [profiles, setProfiles] = useState(null);
+  const { data: session } = useSession();
   useEffect(() => {
     const fakeData = [...Array(20)].map((_, i) => ({
       userId: faker.datatype.uuid(),
@@ -37,8 +42,15 @@ export default function Stories() {
   if (!profiles) return <h1>Loading...</h1>;
   return (
     <div className="flex gap-2 p-6 mt-8 overflow-x-scroll bg-white border border-gray-200 rounded-sm scrollbar-thin scrollbar-thumb-slate-600">
-      {profiles.map(({ userId, name, avatar }) => (
-        <Story key={userId} name={name} avatar={avatar} />
+      {session && (
+        <Story
+          key={session.user.userId}
+          username={session.user.username}
+          avatar={session.user.image}
+        />
+      )}
+      {profiles.map(({ userId, username, avatar }) => (
+        <Story key={userId} username={username} avatar={avatar} />
       ))}
     </div>
   );

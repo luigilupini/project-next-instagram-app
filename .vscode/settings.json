@@ -1,4 +1,5 @@
-// {
-//   "editor.fontFamily": "SP Mono Regular",
-//   "editor.fontSize": 11.5
-// }
+{
+  "cSpell.words": ["Firestore", "nextauth", "signin", "signout"]
+  // "editor.fontSize": 12.8
+  //   "editor.fontFamily": "SP Mono Regular",
+}
