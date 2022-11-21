@@ -11,15 +11,20 @@ import {
   FaceSmileIcon,
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartIconFilled } from "@heroicons/react/24/solid";
+
 import { useEffect, useState } from "react";
 
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -27,15 +32,42 @@ export default function Post({ id, username, userImg, img, caption }) {
   const { data: session } = useSession();
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
+  const [likes, setLikes] = useState([]);
+  const [hasLiked, setHasLiked] = useState(false);
 
   useEffect(() => {
-    const collectionRef = collection(db, "posts", id, "comments");
+    const commentsRef = collection(db, "posts", id, "comments");
     const unsubscribe = onSnapshot(
-      query(collectionRef, orderBy("timestamp", "desc")),
+      query(commentsRef, orderBy("timestamp", "desc")),
       (snapshot) => setComments(snapshot.docs)
     );
     return () => unsubscribe();
   }, [id]);
+
+  useEffect(() => {
+    const likesRef = collection(db, "posts", id, "likes");
+    const unsubscribe = onSnapshot(query(likesRef), (snapshot) =>
+      setLikes(snapshot.docs)
+    );
+    return () => unsubscribe();
+  }, [id]);
+
+  useEffect(() => {
+    setHasLiked(
+      likes.findIndex((like) => like.id === session?.user?.uid) !== -1
+    );
+  }, [likes]);
+
+  const sendLike = async () => {
+    const docRef = doc(db, "posts", id, "likes", session.user.uid);
+    if (hasLiked) {
+      await deleteDoc(docRef);
+      return;
+    }
+    await setDoc(docRef, {
+      username: session.user.username,
+    });
+  };
 
   const sendComment = async (e) => {
     e.preventDefault(); // remove default behavior
@@ -76,7 +108,14 @@ export default function Post({ id, username, userImg, img, caption }) {
       {session && (
         <div className="flex justify-between p-2 py-4">
           <div className="flex gap-4">
-            <HeartIcon className="controlBtn" />
+            {hasLiked ? (
+              <HeartIconFilled
+                className="text-red-500 controlBtn"
+                onClick={sendLike}
+              />
+            ) : (
+              <HeartIcon className="controlBtn" onClick={sendLike} />
+            )}
             <ChatBubbleOvalLeftEllipsisIcon className="controlBtn" />
             <PaperAirplaneIcon className="h-6 -rotate-45 controlBtn" />
           </div>
@@ -85,6 +124,11 @@ export default function Post({ id, username, userImg, img, caption }) {
       )}
       {/* caption */}
       <p className="p-5 text-sm truncate">
+        {likes.length > 0 && (
+          <span className="block my-1 text-xs font-medium">
+            {likes.length} likes
+          </span>
+        )}
         <span className="mr-1 font-bold">{username}:</span>
         {caption}
       </p>
