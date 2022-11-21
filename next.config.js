@@ -7,6 +7,7 @@ const nextConfig = {
       "lh3.googleusercontent.com",
       "googleapis.com",
       "firebasestorage.googleapis.com",
+      "firestore.googleapis.com",
     ],
   },
 };
