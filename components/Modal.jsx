@@ -7,7 +7,20 @@ import { CameraIcon } from "@heroicons/react/24/outline";
 import { useRecoilState } from "recoil";
 import { modalState } from "../atoms/modalAtom";
 
+import { useSession } from "next-auth/react";
+
+import { db, storage } from "../firebase";
+import {
+  addDoc,
+  collection,
+  doc,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
+import { getDownloadURL, ref, uploadString } from "firebase/storage";
+
 export default function Modal() {
+  const { data: session } = useSession();
   const [open, setOpen] = useRecoilState(modalState);
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -15,19 +28,55 @@ export default function Modal() {
   const filePickerRef = useRef(null);
   const captionRef = useRef(null);
 
-  const addImageToPost = (e) => {
-    // console.log(e.target.files[0]);
-    const file = e.target.files[0]; // get selected file!
-    const reader = new FileReader();
-    if (file) reader.readAsDataURL(file);
-    // Once browser is done reading the file, what is returned is a read event,
-    // store the `result` in our component-level state.
-    reader.onload = (readerEvent) => setSelectedFile(readerEvent.target.result);
-  };
-  const uploadPost = async (e) => {
+  const uploadPost = async () => {
     if (loading) return; // if executed already then exit uploading
     // Uploading to firebase section!
     setLoading(true);
+    // 1) Create a new post and add info to firestore 'posts' collection.
+    // 2) Get the post `id` for the newly created post.
+    // `addDoc` add a new document to specified `CollectionReference` with the
+    // given data and assign it a document ID automatically.
+    const newDocRef = await addDoc(collection(db, "posts"), {
+      // What do we want to append to our `posts` collection?
+      username: session.user.username,
+      caption: captionRef.current.value,
+      profileImg: session.user.image,
+      timestamp: serverTimestamp(),
+    });
+
+    // 3) Upload the image to firebase storage "bucket" along with `post.id`.
+    // 4) Get URL from firebase storage to update original post, with image.
+    // 5) Render post with data from firestore and the storage bucket.
+    // `ref` returns a `StorageReference` for the given url.
+    const imageRef = ref(storage, `posts/${newDocRef.id}/image`);
+    // Uploads a string to this object's location. The upload is not resumable.
+    // Our type of data we uploading is `data_url`, the same as the file reader.
+    // When the upload is complete, `then` to append a url to our original post.
+    await uploadString(imageRef, selectedFile, "data_url").then(
+      async (snapshot) => {
+        const downloadURL = await getDownloadURL(imageRef);
+        const postRef = doc(db, "posts", newDocRef.id);
+        await updateDoc(postRef, {
+          image: downloadURL,
+        });
+      }
+    );
+    // Once complete, reset component-level state:
+    setOpen(false);
+    setLoading(false);
+    setSelectedFile(null);
+  };
+
+  const addImageToPost = (e) => {
+    const reader = new FileReader();
+    if (e.target.files[0]) {
+      reader.readAsDataURL(e.target.files[0]);
+    }
+    // Once browser is done reading the file, what is returned is a read event,
+    // store the `result` in our component-level state.
+    reader.onload = (readerEvent) => {
+      setSelectedFile(readerEvent.target.result);
+    };
   };
 
   return (
@@ -35,7 +84,7 @@ export default function Modal() {
       <Dialog
         as="div"
         className="fixed inset-0 z-10 overflow-y-auto "
-        onClose={() => setOpen(false)}
+        onClose={setOpen}
       >
         <div className="flex items-end justify-center min-h-[800px] sm:min-h-screen sm:block text-center pt-4 px-4 pb-20 sm:p-0">
           <Transition.Child
@@ -113,11 +162,12 @@ export default function Modal() {
 
                 <div className="mt-5 sm:mt-6">
                   <button
+                    onClick={uploadPost}
                     type="button"
                     disabled={!selectedFile}
                     className="inline-flex justify-center w-full px-4 py-2 text-base font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm disabled:bg-gray-300 disabled:cursor-not-allowed hover:disabled:bg-gray-300"
                   >
-                    Upload Post
+                    {loading ? "Uploading..." : "Upload Post"}
                   </button>
                 </div>
               </div>

@@ -4,7 +4,7 @@ import { signOut, useSession } from "next-auth/react";
 
 export default function MiniProfile() {
   const { data: session } = useSession();
-  console.log(session); // [...nextauth].js `callback` has enhanced our session.
+  // console.log(session); // [...nextauth].js `callback` has enhanced our session.
   return (
     <div className="flex items-center justify-between ml-10 mt-14">
       <Image

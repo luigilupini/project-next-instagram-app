@@ -1,7 +1,7 @@
 // # Import the functions you need from the SDKs you need
 // Here we tree shaking, importing the specific package we need!
 import { getApps, initializeApp } from "firebase/app";
-import { getFirestore} from 'firebase/firestore'
+import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // # Your web app's Firebase configuration
@@ -20,5 +20,8 @@ const firebaseConfig = {
 // Singleton operation, we ensuring only one instance is open for our app.
 // We use `getApps` a (read-only) array of all `firebase` initialized apps.
 // If array is empty, initialize new `app` instance, otherwise get current.
-export const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()
-export const db = getFirestore(app)
+export const app = !getApps().length
+  ? initializeApp(firebaseConfig)
+  : getApps();
+export const db = getFirestore();
+export const storage = getStorage();
