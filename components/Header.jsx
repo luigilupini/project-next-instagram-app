@@ -20,13 +20,17 @@ Using the `signIn` method ensures the user ends back on the page they started on
 In order to logout, use `signOut` method to ensure the user ends back on the page they started on after completing the sign out flow. It also handles CSRF tokens for you auto. It reloads the page in the browser when complete. */
 import { signIn, signOut, useSession } from "next-auth/react";
 
+import { useRecoilState } from "recoil";
+import { modalState } from "../atoms/modalAtom";
+
 function Header() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [open, setOpen] = useRecoilState(modalState);
   return (
     <header className="sticky top-0 z-50 bg-white border-b shadow-md">
       {/* Our max-width container wrapper: */}
-      <div className="flex items-center justify-between max-w-6xl mx-5 lg:mx-auto">
+      <div className="flex items-center justify-between max-w-6xl mx-5  lg:mx-auto">
         {/* Left (Logo) */}
         <div
           onClick={() => router.push("/")}
@@ -67,7 +71,10 @@ function Header() {
                   3
                 </div>
               </div>
-              <PlusCircleIcon className="navBtn" />
+              <PlusCircleIcon
+                className="navBtn"
+                onClick={() => setOpen(true)}
+              />
               <UserGroupIcon className="navBtn" />
               <HeartIcon className="navBtn" />
               {/* Profile */}
