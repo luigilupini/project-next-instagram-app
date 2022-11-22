@@ -102,7 +102,7 @@ export default function Post({ id, username, userImg, img, caption }) {
         width={500}
         height={500}
         alt="background"
-        className="object-cover w-full h-full"
+        className="object-cover w-full h-96"
       />
       {/* controls/buttons */}
       {session && (
